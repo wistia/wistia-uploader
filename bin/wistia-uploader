@@ -1,0 +1,118 @@
+#!/usr/bin/env ruby
+
+# A simple CLI media uploader for Wistia.
+
+require 'set'
+require 'json'
+require 'optparse'
+
+require_relative '../lib/wistia-uploader'
+
+options = {}
+
+# Required and config-loadable option sets.
+required = Set.new [:api_password, :project_id, :media_file]
+loadable = Set.new([:contact_id]) + required
+
+OptionParser.new do |opts|
+  opts.banner = "Usage: wistia-uploader [options]"
+
+  opts.separator ""
+  opts.separator "Description:"
+  opts.separator "  Upload media files to a Wistia project."
+  opts.separator ""
+  opts.separator "Configuration:"
+  opts.separator "  Default values for required options may be specified as"
+  opts.separator "  newline separated key=value pairs in '~/.wistia.conf'."
+  opts.separator ""
+  opts.separator "  Options provided in this manner will be overridden if"
+  opts.separator "  specified on the command line."
+  opts.separator ""
+
+  opts.separator "General options:"
+
+  opts.on("-v", "--[no-]verbose", "Verbose output") do |v|
+    options[:verbose] = v
+  end
+
+  opts.separator ""
+  opts.separator "Required options:"
+
+  opts.on("-k", "--api-password API_PASSWORD", "The Wistia API password.") do |api_password|
+    options[:api_password] = api_password
+  end
+
+  opts.on("-p", "--project-id PROJECT_ID", "The hashed id of the Wistia project to", "upload to.") do |project_id|
+    options[:project_id] = project_id
+  end
+
+  opts.on("-f", "--media-file MEDIA_FILE", "The local path of the media file to be", "uploaded.") do |media_file|
+    options[:media_file] = media_file
+  end
+
+  opts.separator ""
+  opts.separator "Optional:"
+
+  opts.on("-n", "--media-name MEDIA_NAME", "Set the display name of the media in the", "Wistia project. If unspecified, this will", "default to the filename.") do |media_name|
+    options[:media_name] = media_name
+  end
+
+  opts.on("-c", "--contact-id CONTACT_ID", "The numeric id of the Wistia contact.", "If this is unspecified, the account will", "be inferred from the project_id.") do |contact_id|
+    options[:contact_id] = contact_id
+  end
+
+  opts.on_tail("-h", "--help", "Show this message") do
+    puts opts
+    exit
+  end
+
+end.parse!
+
+# Load defaults from ~/.wistia.conf, if present. Only valid loadable options
+# not already specified on the CLI will be initialized in this manner.
+if File.exists? File.expand_path("~/.wistia.conf")
+  puts "Found ~/.wistia.conf, loading defaults!" if options[:verbose]
+  File.open(File.expand_path("~/.wistia.conf")) do |conf|
+    conf.readlines.reject{|l|l.strip.start_with?('#')}.each do |line|
+      k, v = line.split("=").map { |i| i.strip }
+      next if (k.empty? || v.empty?)
+      if (loadable.include?(k.to_sym) && !options.include?(k.to_sym))
+        puts "  #{k}='#{v}'" if options[:verbose]
+        options[k.to_sym] = v
+      end
+    end
+  end
+  puts "" if options[:verbose]
+end
+
+# Ensure that we have all required parameters.
+unless options.keys.to_set.superset?(required)
+  puts "ERROR: You're missing some required options! Please specify:"
+  puts ""
+  missing = required - options.keys.to_set
+  missing.to_a.sort.each do |m|
+    puts "  --#{m.to_s.gsub(/_/,"-")}"
+  end
+  puts ""
+  puts "Use '-h' to see the help documentation."
+  exit
+end
+
+# Ok, time to upload!
+$stdout.write("Uploading '#{options[:media_file]}' to Wistia...") if options[:verbose]
+$stdout.flush
+begin
+  result = WistiaUploader.upload_media(
+    options[:api_password], options[:project_id],
+    options[:media_file], options[:media_name], options[:contact_id])
+  puts " Done!" if options[:verbose]
+
+  # Pretty-print the resultant media details.
+  if options[:verbose]
+    data = JSON.parse(result)
+    puts "Media (id:#{data['id']}) successfully created."
+    puts "  md5: #{data['md5']}"
+  end
+rescue
+  puts "ERROR! Upload failed. Msg: #{$!}"
+end
