@@ -28,7 +28,8 @@ Gem::Specification.new do |s|
     "bin/wistia-uploader",
     "lib/wistia-uploader.rb",
     "test/helper.rb",
-    "test/test_wistia-uploader.rb"
+    "test/test_wistia-uploader.rb",
+    "wistia-uploader.gemspec"
   ]
   s.homepage = "http://github.com/wistia/wistia-uploader"
   s.licenses = ["MIT"]
