@@ -31,8 +31,12 @@ OptionParser.new do |opts|
 
   opts.separator "General options:"
 
-  opts.on("-v", "--[no-]verbose", "Verbose output") do |v|
-    options[:verbose] = v
+  opts.on("-q", "--quiet", "Silence output") do |q|
+    options[:quiet] = q
+  end
+
+  opts.on("-j", "--json", "Output JSON") do |j|
+    options[:json] = j
   end
 
   opts.separator ""
@@ -71,18 +75,16 @@ end.parse!
 # Load defaults from ~/.wistia.conf, if present. Only valid loadable options
 # not already specified on the CLI will be initialized in this manner.
 if File.exists? File.expand_path("~/.wistia.conf")
-  puts "Found ~/.wistia.conf, loading defaults!" if options[:verbose]
+  puts "Found ~/.wistia.conf, loading defaults!" if !options[:quiet]
   File.open(File.expand_path("~/.wistia.conf")) do |conf|
     conf.readlines.reject{|l|l.strip.start_with?('#')}.each do |line|
       k, v = line.split("=").map { |i| i.strip }
       next if (k.empty? || v.empty?)
       if (loadable.include?(k.to_sym) && !options.include?(k.to_sym))
-        puts "  #{k}='#{v}'" if options[:verbose]
         options[k.to_sym] = v
       end
     end
   end
-  puts "" if options[:verbose]
 end
 
 # Ensure that we have all required parameters.
@@ -99,20 +101,29 @@ unless options.keys.to_set.superset?(required)
 end
 
 # Ok, time to upload!
-$stdout.write("Uploading '#{options[:media_file]}' to Wistia...") if options[:verbose]
+$stdout.write("Uploading '#{options[:media_file]}' ...") if !options[:quiet]
 $stdout.flush
 begin
   result = WistiaUploader.upload_media(
     options[:api_password], options[:project_id],
     options[:media_file], options[:media_name], options[:contact_id])
-  puts " Done!" if options[:verbose]
+  puts " Done!" if !options[:quiet]
+
+
+  data = JSON.parse(result)
 
   # Pretty-print the resultant media details.
-  if options[:verbose]
-    data = JSON.parse(result)
+  if !options[:quiet]
     puts "Media (id:#{data['id']}) successfully created."
+    puts "  bytes: #{data['filesize']}"
     puts "  md5: #{data['md5']}"
+  end
+
+  # Spit out the JSON data returned from wistia.
+  if options[:json]
+    puts data
   end
 rescue
   puts "ERROR! Upload failed. Msg: #{$!}"
+  puts "\t" + $!.backtrace.join("\n\t")
 end
