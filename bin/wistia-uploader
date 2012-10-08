@@ -72,6 +72,12 @@ OptionParser.new do |opts|
 
 end.parse!
 
+# If there's anything left in ARGV after options parsing, assume it's a path
+# to a media file.
+if ARGV[0]
+  options[:media_file] = ARGV[0]
+end
+
 # Load defaults from ~/.wistia.conf, if present. Only valid loadable options
 # not already specified on the CLI will be initialized in this manner.
 if File.exists? File.expand_path("~/.wistia.conf")
@@ -104,11 +110,14 @@ end
 $stdout.write("Uploading '#{options[:media_file]}' ...") if !options[:quiet]
 $stdout.flush
 begin
+  unless File.exists? options[:media_file]
+    puts "ERROR: The file '#{options[:media_file]}' doesn't seem to exist."
+  end
+
   result = WistiaUploader.upload_media(
     options[:api_password], options[:project_id],
     options[:media_file], options[:media_name], options[:contact_id])
   puts " Done!" if !options[:quiet]
-
 
   data = JSON.parse(result)
 
