@@ -11,8 +11,8 @@ require_relative '../lib/wistia-uploader'
 options = {}
 
 # Required and config-loadable option sets.
-required = Set.new [:api_password, :project_id, :media_file]
-loadable = Set.new([:contact_id]) + required
+required = Set.new [:api_password, :media_file]
+loadable = Set.new([:contact_id, :project_id]) + required
 
 OptionParser.new do |opts|
   opts.banner = "Usage: wistia-uploader [options]"
@@ -46,16 +46,16 @@ OptionParser.new do |opts|
     options[:api_password] = api_password
   end
 
-  opts.on("-p", "--project-id PROJECT_ID", "The hashed id of the Wistia project to", "upload to.") do |project_id|
-    options[:project_id] = project_id
-  end
-
   opts.on("-f", "--media-file MEDIA_FILE", "The local path of the media file to be", "uploaded.") do |media_file|
     options[:media_file] = media_file
   end
 
   opts.separator ""
   opts.separator "Optional:"
+
+  opts.on("-p", "--project-id PROJECT_ID", "The hashed id of the Wistia project to", "upload to.") do |project_id|
+    options[:project_id] = project_id
+  end
 
   opts.on("-n", "--media-name MEDIA_NAME", "Set the display name of the media in the", "Wistia project. If unspecified, this will", "default to the filename.") do |media_name|
     options[:media_name] = media_name
