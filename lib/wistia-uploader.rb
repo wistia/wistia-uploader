@@ -17,6 +17,9 @@ class WistiaUploader
   def self.post_file_to_wistia(path, data, file, timeout=nil)
     uri = URI(UPLOAD_URL + path)
 
+    # Sanitize the params hash.
+    data.reject! { |k,v| (v == nil) || v.empty? }
+
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true if (uri.scheme == 'https')
 
