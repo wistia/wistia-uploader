@@ -75,7 +75,7 @@ end.parse!
 # If there's anything left in ARGV after options parsing, assume it's a path
 # to a media file.
 if ARGV[0]
-  options[:media_file] = ARGV[0]
+  options[:media_file] = ARGV
 end
 
 # Load defaults from ~/.wistia.conf, if present. Only valid loadable options
@@ -107,30 +107,72 @@ unless options.keys.to_set.superset?(required)
 end
 
 # Ok, time to upload!
-$stdout.write("Uploading '#{options[:media_file]}' ...") if !options[:quiet]
-$stdout.flush
 begin
-  unless File.exists? options[:media_file]
-    puts "ERROR: The file '#{options[:media_file]}' doesn't seem to exist."
+
+  if options[:media_file].is_a? Array
+    paths = options[:media_file]
+    # NOTE: Ignoring media name for multiple files!
+    if paths.length > 1
+      options[:media_name] = nil
+    end
+  else
+    paths = [options[:media_file]]
   end
 
-  result = WistiaUploader.upload_media(
-    options[:api_password], options[:project_id],
-    options[:media_file], options[:media_name], options[:contact_id])
-  puts " Done!" if !options[:quiet]
+  paths.each do |local_media|
 
-  data = JSON.parse(result)
+    puts "Uploading '#{local_media}'..." if !options[:quiet]
+    # Find the proper expansion of the path.
+    unless File.exists?(local_media) && !File.directory?(local_media)
+      puts "Detected possible shell glob. Computing paths."
+      paths = Dir.glob local_media
+      exit
+    end
 
-  # Pretty-print the resultant media details.
-  if !options[:quiet]
-    puts "Media (id:#{data['id']}) successfully created."
-    puts "  bytes: #{data['filesize']}"
-    puts "  md5: #{data['md5']}"
-  end
+    unless File.exists? local_media
+      puts "ERROR: The file '#{local_media}' doesn't seem to exist."
+      exit
+    end
 
-  # Spit out the JSON data returned from wistia.
-  if options[:json]
-    puts data
+    thread = WistiaUploader.upload_media(
+      options[:api_password], options[:project_id],
+      local_media, options[:media_name], options[:contact_id])
+
+    $stdout.sync
+
+    phases = ["-", "\\", "|", "/"]
+    phase = 0
+    while (!thread[:upload_status])
+      if thread[:progress] == nil
+        comp = 0
+      else
+        comp = (thread[:progress] * 50).round
+      end
+      if thread[:samples] && (thread[:samples].length > 0)
+        bps = (thread[:samples].inject{|sum,x| sum + x[0] }) / thread[:samples].length
+      else
+        bps = 0.0
+      end
+      unless options[:quiet]
+        $stdout.write("\r")
+        $stdout.write(" #{'%3d' % (2*comp)}% [#{'=' * comp}>#{' ' * (50 - comp)}] #{phases[phase]} #{thread[:last_pos]} bytes")
+      end
+      phase = (phase + 1) % 4
+      sleep 0.2
+    end
+    $stdout.write("\n") unless options[:quiet]
+
+    if thread[:upload_status] == :success
+      data = JSON.parse(thread[:body])
+      # Pretty-print the resultant media details.
+      puts " Media (id:#{data['id']}) successfully created." unless options[:quiet]
+      # Spit out the JSON data returned from wistia.
+      puts data if options[:json]
+    else
+      # Error state.
+      puts "An error occurred during upload!" unless options[:quiet]
+      exit 1
+    end
   end
 rescue
   puts "ERROR! Upload failed. Msg: #{$!}"
