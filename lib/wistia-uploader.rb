@@ -70,11 +70,7 @@ class WistiaUploader
       thread[:code] = res.code
       thread[:body] = res.body
 
-      if res.code == '200'
-        thread[:upload_status] = :success
-      else
-        thread[:upload_status] = :failed
-      end
+      thread[:upload_status] = (res.code == '200') ? :success : :failed
     end
   end
 end
