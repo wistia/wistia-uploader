@@ -39,7 +39,7 @@ class WistiaUploader
       uri = URI(UPLOAD_URL + path)
 
       # Sanitize the params hash.
-      data.reject! { |k,v| (v == nil) || v.empty? }
+      data.reject! { |k,v| v.nil? || v.to_s.empty? }
 
       http = Net::HTTP.new(uri.host, uri.port)
       http.use_ssl = true if (uri.scheme == 'https')
