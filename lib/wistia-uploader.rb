@@ -51,14 +51,21 @@ class WistiaUploader
         http.read_timeout = 10
       end
 
-      media = WFile.open(file)
-      media.set_thread(thread)
+      res = nil
+      if file[0..6] == 'http://' || file[0..7] == 'https://' || file[0..5] == 'ftp://'
+        req = Net::HTTP::Post.new(uri.request_uri)
+        req.set_form_data(data.merge(url: file))
+        res = http.request(req)
+      else
+        media = WFile.open(file)
+        media.set_thread(thread)
 
-      req = Net::HTTP::Post::Multipart.new uri.request_uri, data.merge({
-        'file' => UploadIO.new(media, 'application/octet-stream', File.basename(file))
-      })
-      res = http.request(req)
-      media.close
+        req = Net::HTTP::Post::Multipart.new uri.request_uri, data.merge({
+          'file' => UploadIO.new(media, 'application/octet-stream', File.basename(file))
+        })
+        res = http.request(req)
+        media.close
+      end
 
       thread[:code] = res.code
       thread[:body] = res.body
@@ -70,5 +77,4 @@ class WistiaUploader
       end
     end
   end
-
 end
