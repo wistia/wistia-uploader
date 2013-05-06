@@ -27,7 +27,7 @@ class WistiaUploader
     params[:contact_id] = contact if contact
     params[:name] = name if name
 
-    return self.post_file_to_wistia('', params, file)
+    self.post_file_to_wistia('', params, file)
   end
   
   def self.post_file_to_wistia(path, data, file, timeout=nil)
