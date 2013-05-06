@@ -1,3 +1,6 @@
+# Setup environment via bundler
+require 'bundler/setup'
+
 require 'net/http'
 require 'net/http/post/multipart'
 
