@@ -8,6 +8,5 @@ gem 'multipart-post', '>= 1.1.5'
 group :development do
   gem 'shoulda', '>= 0'
   gem 'rdoc', '~> 3.12'
-  gem 'bundler', '~> 1.1.4'
   gem 'jeweler', '~> 1.8.4'
 end

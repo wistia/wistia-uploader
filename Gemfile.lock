@@ -28,7 +28,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  bundler (~> 1.1.4)
   jeweler (~> 1.8.4)
   json
   multipart-post (>= 1.1.5)
