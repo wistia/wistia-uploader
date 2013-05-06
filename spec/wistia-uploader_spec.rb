@@ -63,8 +63,8 @@ describe WistiaUploader do
           thread.join
         end
       end
-      describe 'given a web file' do
-        it 'imports the file' do
+      describe 'for remote files' do
+        before do
           request = mock('request')
           Net::HTTP::Post.should_receive(:new).and_return(request)
           request.stub :set_form_data
@@ -79,49 +79,16 @@ describe WistiaUploader do
 
           response.should_receive(:code).exactly(2).and_return('200')
           response.should_receive(:body).and_return('OK')
-
+        end
+        it 'web file: imports the file' do
           thread = WistiaUploader.post_file_to_wistia('', {api_password: 'pass', project_id: 5}, 'http://fakedomain.cc/dummy.mov')
           thread.join
         end
-      end
-      describe 'given an ssl web file' do
-        it 'imports the file' do
-          request = mock('request')
-          Net::HTTP::Post.should_receive(:new).and_return(request)
-          request.stub :set_form_data
-
-          http = mock('net_http')
-          Net::HTTP.should_receive(:new).and_return(http)
-
-          http.stub :use_ssl=
-
-          response = mock('response')
-          http.should_receive(:request).and_return(response)
-
-          response.should_receive(:code).exactly(2).and_return('200')
-          response.should_receive(:body).and_return('OK')
-
+        it 'ssl web file: imports the file' do
           thread = WistiaUploader.post_file_to_wistia('', {api_password: 'pass', project_id: 5}, 'https://fakedomain.cc/dummy.mov')
           thread.join
         end
-      end
-      describe 'given an ftp file' do
-        it 'imports the file' do
-          request = mock('request')
-          Net::HTTP::Post.should_receive(:new).and_return(request)
-          request.stub :set_form_data
-
-          http = mock('net_http')
-          Net::HTTP.should_receive(:new).and_return(http)
-
-          http.stub :use_ssl=
-
-          response = mock('response')
-          http.should_receive(:request).and_return(response)
-
-          response.should_receive(:code).exactly(2).and_return('200')
-          response.should_receive(:body).and_return('OK')
-
+        it 'ftp file: imports the file' do
           thread = WistiaUploader.post_file_to_wistia('', {api_password: 'pass', project_id: 5}, 'ftp://fakedomain.cc/dummy.mov')
           thread.join
         end
