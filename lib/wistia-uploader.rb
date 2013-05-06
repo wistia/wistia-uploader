@@ -29,48 +29,82 @@ class WistiaUploader
 
     self.post_file_to_wistia('', params, file)
   end
-  
+
+
   def self.post_file_to_wistia(path, data, file, timeout=nil)
+    data.reject! { |k,v| v.nil? || v.to_s.empty? } # Sanitize the params hash.
+
     Thread.new do
-      thread = Thread.current
-      thread[:progress] = 0.0
-      thread[:last_pos] = 0
+      Thread.current[:progress] = 0.0
+      Thread.current[:last_pos] = 0
 
       uri = URI(UPLOAD_URL + path)
+      http_client = self.get_http_client(uri, timeout)
+      response = self.perform_http_post(file, data, uri, http_client)
 
-      # Sanitize the params hash.
-      data.reject! { |k,v| v.nil? || v.to_s.empty? }
-
-      http = Net::HTTP.new(uri.host, uri.port)
-      http.use_ssl = true if (uri.scheme == 'https')
-
-      # Set the connection timeouts, if specified
-      if timeout
-        http.ssl_timeout = 10
-        http.open_timeout = 10
-        http.read_timeout = 10
-      end
-
-      res = nil
-      if file[0..6] == 'http://' || file[0..7] == 'https://' || file[0..5] == 'ftp://'
-        req = Net::HTTP::Post.new(uri.request_uri)
-        req.set_form_data(data.merge(url: file))
-        res = http.request(req)
-      else
-        media = WFile.open(file)
-        media.set_thread(thread)
-
-        req = Net::HTTP::Post::Multipart.new uri.request_uri, data.merge({
-          'file' => UploadIO.new(media, 'application/octet-stream', File.basename(file))
-        })
-        res = http.request(req)
-        media.close
-      end
-
-      thread[:code] = res.code
-      thread[:body] = res.body
-
-      thread[:upload_status] = (res.code == '200') ? :success : :failed
+      self.set_thread_status_from_response(response)
     end
+  end
+
+
+  private
+
+  def self.perform_http_post(file, data, uri, http_client)
+    if self.file_is_local?(file)
+      self.upload_local_file(file, data, uri, http_client)
+    else
+      self.import_remote_file(file, data, uri, http_client)
+    end
+  end
+
+
+  def self.get_http_client(uri, timeout)
+    http = Net::HTTP.new(uri.host, uri.port)
+    http.use_ssl = true if (uri.scheme == 'https')
+
+    # Set the connection timeouts, if specified
+    if timeout
+      http.ssl_timeout = 10
+      http.open_timeout = 10
+      http.read_timeout = 10
+    end
+
+    http
+  end
+
+
+  def self.upload_local_file(file, data, uri, http)
+    media = WFile.open(file)
+    media.set_thread(Thread.current)
+    req = Net::HTTP::Post::Multipart.new uri.request_uri, data.merge({
+      'file' => UploadIO.new(media, 'application/octet-stream', File.basename(file))
+    })
+    media.close
+    http.request(req)
+  end
+
+
+  def self.import_remote_file(file, data, uri, http)
+    req = Net::HTTP::Post.new(uri.request_uri)
+    req.set_form_data(data.merge(url: file))
+    http.request(req)
+  end
+
+
+  def self.file_is_local?(file_path)
+    !self.file_is_remote?(file_path)
+  end
+
+
+  def self.file_is_remote?(file_path)
+    file_path[0..6] == 'http://' || file_path[0..7] == 'https://' || file_path[0..5] == 'ftp://'
+  end
+
+
+  def self.set_thread_status_from_response(response)
+    Thread.current[:code] = response.code
+    Thread.current[:body] = response.body
+
+    Thread.current[:upload_status] = (response.code == '200') ? :success : :failed
   end
 end

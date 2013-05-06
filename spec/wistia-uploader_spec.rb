@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe WistiaUploader do
-  describe 'class methods' do
+  describe 'public class methods' do
     describe '#upload_media' do
       it 'posts the specified file to Wistia when given optional params' do
         password = mock('password')
@@ -125,6 +125,47 @@ describe WistiaUploader do
           thread = WistiaUploader.post_file_to_wistia('', {api_password: 'pass', project_id: 5}, 'ftp://fakedomain.cc/dummy.mov')
           thread.join
         end
+      end
+    end
+  end
+
+  describe 'private class methods' do
+    describe '#perform_http_post' do
+      describe 'with local file' do
+        it 'performs upload' do
+          WistiaUploader.stub(:file_is_local?).and_return(true)
+          WistiaUploader.should_receive(:upload_local_file).exactly(1)
+          WistiaUploader.send :perform_http_post, nil, nil, nil, nil
+        end
+      end
+      describe 'with remote file' do
+        it 'performs import' do
+          WistiaUploader.stub(:file_is_local?).and_return(false)
+          WistiaUploader.should_receive(:import_remote_file).exactly(1)
+          WistiaUploader.send :perform_http_post, nil, nil, nil, nil
+        end
+      end
+    end
+    describe '#file_is_local? and #file_is_remote?' do
+      it 'works for http (non-ssl) files' do
+        file_path = 'http://example.com/movie.mov'
+        WistiaUploader.send(:file_is_local?, file_path).should be_false
+        WistiaUploader.send(:file_is_remote?, file_path).should be_true
+      end
+      it 'works for http (ssl) files' do
+        file_path = 'https://example.com/movie.mov'
+        WistiaUploader.send(:file_is_local?, file_path).should be_false
+        WistiaUploader.send(:file_is_remote?, file_path).should be_true
+      end
+      it 'works for ftp files' do
+        file_path = 'ftp://example.com/movie.mov'
+        WistiaUploader.send(:file_is_local?, file_path).should be_false
+        WistiaUploader.send(:file_is_remote?, file_path).should be_true
+      end
+      it 'works for local files' do
+        file_path = '/var/www/movie.mov'
+        WistiaUploader.send(:file_is_local?, file_path).should be_true
+        WistiaUploader.send(:file_is_remote?, file_path).should be_false
       end
     end
   end
