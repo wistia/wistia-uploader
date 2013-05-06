@@ -10,3 +10,7 @@ group :development do
   gem 'rdoc', '~> 3.12'
   gem 'jeweler', '~> 1.8.4'
 end
+
+group :test do
+  gem 'rspec'
+end

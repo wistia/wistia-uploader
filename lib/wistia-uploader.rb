@@ -22,7 +22,6 @@ end
 
 
 class WistiaUploader
-
   def self.upload_media(api_pass, project, file, name=nil, contact=nil)
     params = { :api_password => api_pass, :project_id => project }
     params[:contact_id] = contact if contact
