@@ -1,7 +1,7 @@
 require 'net/http'
 require 'net/http/post/multipart'
 
-UPLOAD_URL = "https://upload.wistia.com/"
+UPLOAD_URL = 'https://upload.wistia.com/'
 
 # Hacktacular mostly-accurate patch for upload monitoring.
 class WFile < File
