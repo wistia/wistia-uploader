@@ -97,16 +97,7 @@ class WistiaUploader
 
 
   def self.file_is_remote?(file_path)
-    case `whoami`.chomp
-    when 'brendan'
-      file_path =~ /^(http|https|ftp):\/\//
-    when 'jason'
-      %w(http https ftp).include?(URI.parse(file_path).scheme)
-    when 'robby'
-      file_path[0..6] == 'http://' || file_path[0..7] == 'https://' || file_path[0..5] == 'ftp://'
-    else
-      %w(http https ftp).map{|p| file_path[0..(p.length + 2)] == "#{p}://"}.include?(true)
-    end
+    file_path =~ /^(http|https|ftp):\/\//
   end
 
 
