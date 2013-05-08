@@ -79,8 +79,9 @@ class WistiaUploader
     req = Net::HTTP::Post::Multipart.new uri.request_uri, data.merge({
       'file' => UploadIO.new(media, 'application/octet-stream', File.basename(file))
     })
+    response = http.request(req)
     media.close
-    http.request(req)
+    response
   end
 
 
