@@ -6,7 +6,7 @@ require 'set'
 require 'json'
 require 'optparse'
 
-require_relative '../lib/wistia-uploader'
+require File.expand_path('../../lib/wistia-uploader', __FILE__)
 
 options = {}
 
