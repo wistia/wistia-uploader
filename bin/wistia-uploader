@@ -3,7 +3,6 @@
 # A simple CLI media uploader for Wistia.
 
 require 'set'
-require 'json'
 require 'optparse'
 
 require File.expand_path('../../lib/wistia-uploader', __FILE__)

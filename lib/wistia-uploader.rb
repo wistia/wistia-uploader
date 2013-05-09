@@ -87,7 +87,7 @@ class WistiaUploader
 
   def self.import_remote_file(file, data, uri, http)
     req = Net::HTTP::Post.new(uri.request_uri)
-    req.set_form_data(data.merge(url: file))
+    req.set_form_data(data.merge(:url => file))
     http.request(req)
   end
 
