@@ -1,11 +1,14 @@
-wistia-uploader
-===============
+# wistia-uploader
 
-A simple command line media upload client for Wistia users.
+A command line media upload client for Wistia users.
 
 Run 'bin/wistia-uploader -h' for additional information.
 
-Configuration
+## Requirements
+
+wistia-uploader works with Ruby 1.8.7 and 1.9.3. Earlier versions of 1.8 and 1.9 may work but have not been tested.
+
+## Configuration
 -------------
 
 While not required for use, defaults for various required parameters may be
@@ -18,8 +21,3 @@ key/value pairs. Example:
 
 A Wistia 'contact_id' may also be specified, otherwise the account owner will
 be inferred from the project.
-
-Copyright
----------
-
-Copyright (c) 2012 Jason Lawrence of Wistia, Inc.

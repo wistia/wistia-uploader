@@ -45,7 +45,7 @@ OptionParser.new do |opts|
     options[:api_password] = api_password
   end
 
-  opts.on('-f', '--media-file MEDIA_FILE', 'The local path of the media file to be', 'uploaded.') do |media_file|
+  opts.on('-f', '--media-file MEDIA_FILE', 'The local/remote path of the media file', 'to be uploaded/imported.') do |media_file|
     options[:media_file] = media_file
   end
 
