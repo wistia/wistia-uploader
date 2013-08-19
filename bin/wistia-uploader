@@ -141,7 +141,7 @@ begin
 
     phases = ["-", "\\", "|", "/"]
     phase = 0
-    while (!thread[:upload_status])
+    while (thread[:upload_status].nil?)
       if thread[:progress] == nil
         comp = 0
       else

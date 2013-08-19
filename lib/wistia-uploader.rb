@@ -1,7 +1,10 @@
 # Setup environment via bundler
+require 'rubygems'
 require 'bundler/setup'
 
+require 'json'
 require 'net/http'
+require 'net/https' if RUBY_VERSION =~ /^1.8/
 require 'net/http/post/multipart'
 
 UPLOAD_URL = 'https://upload.wistia.com/'
@@ -13,8 +16,13 @@ class WFile < File
   end
   def read(*args)
     if @thread
-      @thread[:progress] = ((1.0 * self.pos()) / self.size()).round(2)
-      @thread[:last_pos] = self.pos()
+      rounded_file_size = if RUBY_VERSION =~ /^1.8/
+                            (File.size(self.path) * 100).round / 100.0
+                          else
+                            self.size.round(2)
+                          end
+      @thread[:progress] = 1.0 * self.pos / rounded_file_size
+      @thread[:last_pos] = self.pos
     end
     super(*args)
   end
@@ -33,17 +41,15 @@ class WistiaUploader
 
   def self.post_file_to_wistia(path, data, file, timeout=nil)
     data.reject! { |k,v| v.nil? || v.to_s.empty? } # Sanitize the params hash.
-
-    Thread.new do
+    thread = Thread.new do
       Thread.current[:progress] = 0.0
       Thread.current[:last_pos] = 0
-
       uri = URI(UPLOAD_URL + path)
       http_client = self.get_http_client(uri, timeout)
       response = self.perform_http_post(file, data, uri, http_client)
-
       self.set_thread_status_from_response(response)
     end
+    thread
   end
 
 
@@ -60,7 +66,13 @@ class WistiaUploader
 
   def self.get_http_client(uri, timeout)
     http = Net::HTTP.new(uri.host, uri.port)
-    http.use_ssl = true if (uri.scheme == 'https')
+    if uri.scheme == 'https'
+      if RUBY_VERSION =~ /^1.8/
+        http.cert_store = OpenSSL::X509::Store.new.set_default_paths
+      end
+      http.use_ssl = true
+      http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+    end
 
     # Set the connection timeouts, if specified
     if timeout
