@@ -118,43 +118,52 @@ begin
     paths = [options[:media_file]]
   end
 
-  paths.each do |local_media|
-
-    puts "Uploading '#{local_media}'..." if !options[:quiet]
-
-    unless File.exists? local_media
-      puts "ERROR: The file '#{local_media}' doesn't seem to exist."
-      exit
+  paths.each do |original_media_path|
+    if File.exists?(original_media_path)
+      puts "Uploading local file: '#{original_media_path}'..." if !options[:quiet]
+      original_media_is_local = true
+    else
+      if original_media_path =~ /^(#{(WistiaUploader::SUPPORTED_SCHEMES.join('|'))}):\/\//
+        puts "Importing remote file: '#{original_media_path}'..." if !options[:quiet]
+        original_media_is_local = false
+      else
+        puts "Local file #{original_media_path} does not exist."
+        exit
+      end
     end
 
     thread = WistiaUploader.upload_media(
       options[:api_password], options[:project_id],
-      local_media, options[:media_name], options[:contact_id])
+      original_media_path, options[:media_name], options[:contact_id])
 
     $stdout.sync
 
-    phases = ["-", "\\", "|", "/"]
-    phase = 0
-    while (thread[:upload_status].nil?)
-      if thread[:progress] == nil
-        comp = 0
-      else
-        comp = (thread[:progress] * 50).round
+    if original_media_is_local
+      phases = ["-", "\\", "|", "/"]
+      phase = 0
+      while (thread[:upload_status].nil?)
+        if thread[:progress] == nil
+          comp = 0
+        else
+          comp = (thread[:progress] * 50).round
+        end
+        if thread[:samples] && (thread[:samples].length > 0)
+          bps = (thread[:samples].inject{|sum,x| sum + x[0] }) / thread[:samples].length
+        else
+          bps = 0.0
+        end
+        unless options[:quiet]
+          $stdout.write("\r")
+          $stdout.write(" #{'%3d' % (2*comp)}% [#{'=' * comp}>#{' ' * (50 - comp)}] #{phases[phase]} #{thread[:last_pos]} bytes")
+          $stdout.flush if RUBY_VERSION =~ /^1.8/
+        end
+        phase = (phase + 1) % 4
+        sleep 0.2
       end
-      if thread[:samples] && (thread[:samples].length > 0)
-        bps = (thread[:samples].inject{|sum,x| sum + x[0] }) / thread[:samples].length
-      else
-        bps = 0.0
-      end
-      unless options[:quiet]
-        $stdout.write("\r")
-        $stdout.write(" #{'%3d' % (2*comp)}% [#{'=' * comp}>#{' ' * (50 - comp)}] #{phases[phase]} #{thread[:last_pos]} bytes")
-        $stdout.flush if RUBY_VERSION =~ /^1.8/
-      end
-      phase = (phase + 1) % 4
-      sleep 0.2
+      $stdout.write("\n") unless options[:quiet]
+    else
+      thread.join
     end
-    $stdout.write("\n") unless options[:quiet]
 
     if thread[:upload_status] == :success
       data = JSON.parse(thread[:body])

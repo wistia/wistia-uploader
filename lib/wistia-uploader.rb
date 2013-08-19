@@ -7,8 +7,6 @@ require 'net/http'
 require 'net/https' if RUBY_VERSION =~ /^1.8/
 require 'net/http/post/multipart'
 
-UPLOAD_URL = 'https://upload.wistia.com/'
-
 # Hacktacular mostly-accurate patch for upload monitoring.
 class WFile < File
   def set_thread(thread)
@@ -30,6 +28,9 @@ end
 
 
 class WistiaUploader
+  UPLOAD_URL = 'https://upload.wistia.com/'
+  SUPPORTED_SCHEMES = %w(ftp http https)
+
   def self.upload_media(api_pass, project, file, name=nil, contact=nil)
     params = { :api_password => api_pass, :project_id => project }
     params[:contact_id] = contact if contact
@@ -110,7 +111,7 @@ class WistiaUploader
 
 
   def self.file_is_remote?(file_path)
-    file_path =~ /^(http|https|ftp):\/\//
+    file_path =~ /^(#{(SUPPORTED_SCHEMES.join('|'))}):\/\//
   end
 
 
