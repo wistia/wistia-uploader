@@ -14,13 +14,13 @@ require 'rake'
 require 'jeweler'
 Jeweler::Tasks.new do |gem|
   # gem is a Gem::Specification... see http://docs.rubygems.org/read/chapter/20 for more options
-  gem.name = "wistia-uploader"
-  gem.homepage = "http://github.com/wistia/wistia-uploader"
-  gem.license = "MIT"
-  gem.summary = %Q{A simple CLI uploader for Wistia users.}
-  gem.description = %Q{A simple CLI uploader for Wistia users.}
-  gem.email = "jason@wistia.com"
-  gem.authors = ["Jason Lawrence"]
+  gem.name = 'wistia-uploader'
+  gem.homepage = 'http://github.com/wistia/wistia-uploader'
+  gem.license = 'MIT'
+  gem.summary = 'A simple CLI uploader for Wistia users.'
+  gem.description = 'A simple CLI uploader for Wistia users.'
+  gem.email = 'dev@wistia.com'
+  gem.authors = ['Robby Grossman', 'Jason Lawrence', 'Brendan Schwartz']
   # dependencies defined in Gemfile
 end
 Jeweler::RubygemsDotOrgTasks.new

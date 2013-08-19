@@ -8,10 +8,10 @@ Gem::Specification.new do |s|
   s.version = "1.0.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
-  s.authors = ["Jason Lawrence"]
+  s.authors = ["Robby Grossman", "Jason Lawrence", "Brendan Schwartz"]
   s.date = "2013-08-19"
   s.description = "A simple CLI uploader for Wistia users."
-  s.email = "jason@wistia.com"
+  s.email = "dev@wistia.com"
   s.executables = ["wistia-uploader"]
   s.extra_rdoc_files = [
     "LICENSE.txt",
