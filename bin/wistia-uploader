@@ -121,12 +121,6 @@ begin
   paths.each do |local_media|
 
     puts "Uploading '#{local_media}'..." if !options[:quiet]
-    # Find the proper expansion of the path.
-    unless File.exists?(local_media) && !File.directory?(local_media)
-      puts 'Detected possible shell glob. Computing paths.'
-      paths = Dir.glob local_media
-      exit
-    end
 
     unless File.exists? local_media
       puts "ERROR: The file '#{local_media}' doesn't seem to exist."
