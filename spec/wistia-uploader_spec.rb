@@ -51,6 +51,7 @@ describe WistiaUploader do
           Net::HTTP.should_receive(:new).and_return(http)
 
           http.stub :use_ssl=
+          http.stub :verify_mode=
 
           response = mock('response')
           http.should_receive(:request).and_return(response)
@@ -73,6 +74,7 @@ describe WistiaUploader do
           Net::HTTP.should_receive(:new).and_return(http)
 
           http.stub :use_ssl=
+          http.stub :verify_mode=
 
           response = mock('response')
           http.should_receive(:request).and_return(response)
