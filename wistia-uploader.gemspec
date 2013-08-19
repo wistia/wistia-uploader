@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "wistia-uploader"
-  s.version = "0.1.4"
+  s.version = "1.0.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Jason Lawrence"]
-  s.date = "2012-12-06"
+  s.date = "2013-08-19"
   s.description = "A simple CLI uploader for Wistia users."
   s.email = "jason@wistia.com"
   s.executables = ["wistia-uploader"]
@@ -19,6 +19,7 @@ Gem::Specification.new do |s|
   ]
   s.files = [
     ".document",
+    ".rvmrc",
     "Gemfile",
     "Gemfile.lock",
     "LICENSE.txt",
@@ -27,14 +28,14 @@ Gem::Specification.new do |s|
     "VERSION",
     "bin/wistia-uploader",
     "lib/wistia-uploader.rb",
-    "test/helper.rb",
-    "test/test_wistia-uploader.rb",
+    "spec/spec_helper.rb",
+    "spec/wistia-uploader_spec.rb",
     "wistia-uploader.gemspec"
   ]
   s.homepage = "http://github.com/wistia/wistia-uploader"
   s.licenses = ["MIT"]
   s.require_paths = ["lib"]
-  s.rubygems_version = "1.8.24"
+  s.rubygems_version = "1.8.25"
   s.summary = "A simple CLI uploader for Wistia users."
 
   if s.respond_to? :specification_version then
@@ -45,14 +46,12 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<multipart-post>, [">= 1.1.5"])
       s.add_development_dependency(%q<shoulda>, [">= 0"])
       s.add_development_dependency(%q<rdoc>, ["~> 3.12"])
-      s.add_development_dependency(%q<bundler>, ["~> 1.1.4"])
       s.add_development_dependency(%q<jeweler>, ["~> 1.8.4"])
     else
       s.add_dependency(%q<json>, [">= 0"])
       s.add_dependency(%q<multipart-post>, [">= 1.1.5"])
       s.add_dependency(%q<shoulda>, [">= 0"])
       s.add_dependency(%q<rdoc>, ["~> 3.12"])
-      s.add_dependency(%q<bundler>, ["~> 1.1.4"])
       s.add_dependency(%q<jeweler>, ["~> 1.8.4"])
     end
   else
@@ -60,7 +59,6 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<multipart-post>, [">= 1.1.5"])
     s.add_dependency(%q<shoulda>, [">= 0"])
     s.add_dependency(%q<rdoc>, ["~> 3.12"])
-    s.add_dependency(%q<bundler>, ["~> 1.1.4"])
     s.add_dependency(%q<jeweler>, ["~> 1.8.4"])
   end
 end
