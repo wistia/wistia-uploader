@@ -155,6 +155,7 @@ begin
       unless options[:quiet]
         $stdout.write("\r")
         $stdout.write(" #{'%3d' % (2*comp)}% [#{'=' * comp}>#{' ' * (50 - comp)}] #{phases[phase]} #{thread[:last_pos]} bytes")
+        $stdout.flush if RUBY_VERSION =~ /^1.8/
       end
       phase = (phase + 1) % 4
       sleep 0.2
