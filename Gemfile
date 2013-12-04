@@ -8,7 +8,7 @@ gem 'multipart-post', '>= 1.2'
 group :development do
   gem 'shoulda', '>= 0'
   gem 'rdoc', '~> 3.12'
-  gem 'jeweler', '~> 1.8.4'
+  gem 'jeweler', '~> 1.8.8'
 end
 
 group :test do
