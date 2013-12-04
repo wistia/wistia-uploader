@@ -4,11 +4,11 @@ describe WistiaUploader do
   describe 'public class methods' do
     describe '#upload_media' do
       it 'posts the specified file to Wistia when given optional params' do
-        password = mock('password')
-        project = mock('project')
-        file = mock('file')
-        name = mock('name')
-        contact = mock('contact')
+        password = double('password')
+        project = double('project')
+        file = double('file')
+        name = double('name')
+        contact = double('contact')
 
         WistiaUploader.should_receive(:post_file_to_wistia).with('',
           hash_including({
@@ -21,9 +21,9 @@ describe WistiaUploader do
         WistiaUploader.upload_media(password, project, file, name, contact)
       end
       it 'posts the specified file to Wistia when given only required params' do
-        password = mock('password')
-        project = mock('project')
-        file = mock('file')
+        password = double('password')
+        project = double('project')
+        file = double('file')
 
         WistiaUploader.should_receive(:post_file_to_wistia).with('',
           hash_including({
@@ -37,23 +37,23 @@ describe WistiaUploader do
     describe '#post_file_to_wistia' do
       describe 'given a local file' do
         it 'uploads the file' do
-          file = mock('file')
+          file = double('file')
           file.stub :set_thread
           WFile.should_receive(:open).with('/var/tmp/dummy.mov').and_return(file)
 
-          upload_io = mock('upload io')
+          upload_io = double('upload io')
           UploadIO.should_receive(:new).and_return(upload_io)
 
-          request = mock('request')
+          request = double('request')
           Net::HTTP::Post::Multipart.should_receive(:new).and_return(request)
 
-          http = mock('net_http')
+          http = double('net_http')
           Net::HTTP.should_receive(:new).and_return(http)
 
           http.stub :use_ssl=
           http.stub :verify_mode=
 
-          response = mock('response')
+          response = double('response')
           http.should_receive(:request).and_return(response)
           file.stub :close
 
@@ -66,17 +66,17 @@ describe WistiaUploader do
       end
       describe 'for remote files' do
         before do
-          request = mock('request')
+          request = double('request')
           Net::HTTP::Post.should_receive(:new).and_return(request)
           request.stub :set_form_data
 
-          http = mock('net_http')
+          http = double('net_http')
           Net::HTTP.should_receive(:new).and_return(http)
 
           http.stub :use_ssl=
           http.stub :verify_mode=
 
-          response = mock('response')
+          response = double('response')
           http.should_receive(:request).and_return(response)
 
           response.should_receive(:code).exactly(2).and_return('200')
