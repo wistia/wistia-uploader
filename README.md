@@ -6,7 +6,7 @@ Run 'bin/wistia-uploader -h' for additional information.
 
 ## Requirements
 
-wistia-uploader works with Ruby 1.8.7 and 1.9.3. Earlier versions of 1.8 and 1.9 may work but have not been tested.
+wistia-uploader works with Ruby 1.8.7, 1.9.3 and 2.0.0. Earlier versions of 1.8 and 1.9 may work but have not been tested.
 
 ## Configuration
 -------------
